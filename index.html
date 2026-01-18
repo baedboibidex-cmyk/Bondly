@@ -1,52 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bondly 💖</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ff4b6e">
-  <link rel="stylesheet" href="style.css">
+// 🔥 Clear old service workers
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.getRegistrations()
+      .then(registrations => {
+        registrations.forEach(registration => registration.unregister());
+      })
+      .catch(err => {
+        console.log("Service worker cleanup failed:", err);
+      });
+  });
+}
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+// 🔐 Initialize Firebase auth and database
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  <!-- Firebase config -->
-  <script src="firebase.js"></script>
+// 🔐 SIGN UP
+function signup() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const username = document.getElementById("username").value;
 
-  <!-- App logic -->
-  <script defer src="script.js"></script>
-</head>
-<body>
+  if (!email || !password || !username) {
+    alert("Fill all fields");
+    return;
+  }
 
-  <div class="container">
-    <h1>Bondly 💖</h1>
-    <p>Find love anywhere in the world</p>
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const user = userCredential.user;
 
-    <input type="text" id="username" placeholder="Username">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
+      return db.collection("users").doc(user.uid).set({
+        username: username,
+        email: email,
+        is18Verified: false,   // 🔞 age lock
+        isPremium: false,      // 💳 paywall
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    })
+    .then(() => {
+      alert("Account created!");
+      window.location.href = "matches.html"; // go to Matches page
+    })
+    .catch(error => {
+      alert(error.message);
+    });
+}
 
-    <button onclick="signup()">Create Account</button>
+// 🔑 LOGIN
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-    <p onclick="login()" style="cursor:pointer;">
-      Already have an account? Login
-    </p>
+  if (!email || !password) {
+    alert("Fill all fields");
+    return;
+  }
 
-    <!-- Navigation -->
-    <div class="nav">
-      <a href="profile.html">Profile</a>
-      <a href="matches.html">Matches</a>
-      <a href="chat.html">Chat</a>
-      <a href="status.html">Status</a>
-      <a href="games.html">Games</a>
-      <a href="premium.html">Premium</a>
-      <a href="verify18.html">Verify 18+</a>
-    </div>
-  </div>
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      window.location.href = "chat.html"; // go to Chat page
+    })
+    .catch(error => {
+      alert(error.message);
+    });
+}
 
-</body>
-</html>
-
+// 🛡️ Optional: keep users logged in without redirect
+auth.onAuthStateChanged(user => {
+  if (user) {
+    console.log("User logged in:", user.email);
+    // Do NOT auto-redirect; let user navigate manually
+  } else {
+    console.log("No user logged in");
+  }
+});
