@@ -1,16 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Bondly</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bondly 💖</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ff4b6e">
   <link rel="stylesheet" href="style.css">
 
-  <!-- Firebase SDKs (MUST be first) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- Firebase config -->
+  <script src="firebase.js"></script>
+
+  <!-- App logic -->
+  <script defer src="script.js"></script>
 </head>
 <body>
 
@@ -27,13 +34,18 @@
     <p onclick="login()" style="cursor:pointer;">
       Already have an account? Login
     </p>
+
+    <!-- Navigation -->
+    <div class="nav">
+      <a href="profile.html">Profile</a>
+      <a href="matches.html">Matches</a>
+      <a href="chat.html">Chat</a>
+      <a href="status.html">Status</a>
+      <a href="games.html">Games</a>
+      <a href="premium.html">Premium</a>
+      <a href="verify18.html">Verify 18+</a>
+    </div>
   </div>
-
-  <!-- Firebase Config -->
-  <script src="firebase.js"></script>
-
-  <!-- Bondly App Logic -->
-  <script src="script.js"></script>
 
 </body>
 </html>
