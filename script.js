@@ -1,77 +1,40 @@
-// 🔥 Clear old Firebase / default service workers
+// Clear old service workers
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.getRegistrations()
-      .then(registrations => {
-        registrations.forEach(registration => {
-          registration.unregister();
-        });
-      })
-      .catch(err => {
-        console.log("Service worker cleanup failed:", err);
-      });
+      .then(r => r.forEach(reg => reg.unregister()))
+      .catch(err => console.log(err));
   });
 }
 
-// 🔐 SIGN UP
-function signup() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const username = document.getElementById("username").value.trim();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  if (!email || !password || !username) {
-    alert("Please fill all fields!");
-    return;
-  }
+// SIGN UP
+function signup() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const username = document.getElementById("username").value;
+
+  if (!email || !password || !username) { alert("Fill all fields"); return; }
 
   auth.createUserWithEmailAndPassword(email, password)
-    .then(userCredential => {
-      const user = userCredential.user;
-
-      return db.collection("users").doc(user.uid).set({
-        username: username,
-        email: email,
-        is18Verified: false,   // 🔞 age lock
-        isPremium: false,      // 💳 paywall
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    })
-    .then(() => {
-      alert("Account created successfully!");
-      window.location.href = "matches.html"; // Next page
-    })
-    .catch(error => {
-      alert(error.message);
-    });
+    .then(u => db.collection("users").doc(u.user.uid).set({
+      username, email, is18Verified: false, isPremium: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }))
+    .then(() => { alert("Account created!"); window.location.href="matches.html"; })
+    .catch(e => alert(e.message));
 }
 
-// 🔑 LOGIN
+// LOGIN
 function login() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  if (!email || !password) {
-    alert("Please fill all fields!");
-    return;
-  }
+  if (!email || !password) { alert("Fill all fields"); return; }
 
   auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      window.location.href = "chat.html"; // Redirect logged-in users to chat
-    })
-    .catch(error => {
-      alert(error.message);
-    });
+    .then(() => window.location.href="chat.html")
+    .catch(e => alert(e.message));
 }
-
-// ✅ Keep home page visible for all
-// Optional: you can still check auth state for UI tweaks, but no auto redirect
-auth.onAuthStateChanged(user => {
-  if (user) {
-    console.log("User logged in:", user.email);
-    // You can update UI here instead of redirecting
-    // Example: show user's username or enable chat link
-  } else {
-    console.log("No user logged in");
-  }
-});

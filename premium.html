@@ -18,17 +18,18 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- Paystack -->
+  <!-- Paystack SDK -->
   <script src="https://js.paystack.co/v1/inline.js"></script>
 
   <!-- Firebase config -->
   <script src="firebase.js"></script>
 
   <script>
+    // 🔐 Initialize Firebase auth and Firestore
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 🔐 Check if user is logged in
+    // 🛡️ Check if user is logged in
     auth.onAuthStateChanged(user => {
       if (!user) {
         alert("Please login first!");
@@ -37,6 +38,7 @@
       }
     });
 
+    // 🔑 Handle Premium payment
     const payButton = document.getElementById('payButton');
 
     payButton.addEventListener('click', () => {
@@ -47,13 +49,15 @@
       }
 
       let handler = PaystackPop.setup({
-        key: 'pk_test_01dccc55e7797eec7f39f897124d87c99a615883', // Your Paystack public key
+        key: 'pk_test_01dccc55e7797eec7f39f897124d87c99a615883', // ✅ Your Paystack Public Key
         email: user.email,
         amount: 1000 * 100, // Amount in kobo
         currency: 'NGN',
         ref: 'BON-' + Math.floor(Math.random() * 1000000000),
-        callback: function(response){
+        callback: function(response) {
           alert('Payment complete! Ref: ' + response.reference);
+          
+          // Update Firestore to mark user as Premium
           db.collection('users').doc(user.uid).update({
             isPremium: true,
             premiumSince: firebase.firestore.FieldValue.serverTimestamp()
@@ -61,10 +65,11 @@
           .then(() => console.log("User upgraded to Premium"))
           .catch(err => console.error(err));
         },
-        onClose: function(){
+        onClose: function() {
           alert('Payment cancelled.');
         }
       });
+
       handler.openIframe();
     });
   </script>
