@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Matches - Bondly</title>
   <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Matches</h1>
+    <div id="matchesContainer">
+      <p>Loading matches...</p>
+    </div>
+  </div>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -14,65 +22,7 @@
   <!-- Firebase config -->
   <script src="firebase.js"></script>
 
-  <!-- Page logic -->
-  <script defer src="script.js"></script>
-</head>
-<body>
-  <div class="container">
-    <h1>Matches 💌</h1>
-    <p>See your potential matches below!</p>
-
-    <div id="matchesList">
-      <!-- Matches will be displayed here -->
-    </div>
-
-    <!-- Navigation -->
-    <div class="nav">
-      <a href="index.html">Home</a>
-      <a href="profile.html">Profile</a>
-      <a href="chat.html">Chat</a>
-      <a href="status.html">Status</a>
-      <a href="games.html">Games</a>
-      <a href="premium.html">Premium</a>
-      <a href="verify18.html">Verify 18+</a>
-    </div>
-  </div>
-
-  <script>
-    // 🔐 Ensure user is logged in
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        alert("Please login first!");
-        window.location.href = "index.html";
-        return;
-      }
-
-      // Fetch all users except current user
-      db.collection('users').get().then(snapshot => {
-        const matchesDiv = document.getElementById('matchesList');
-        matchesDiv.innerHTML = '';
-
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          if (doc.id !== user.uid) {
-            const matchCard = document.createElement('div');
-            matchCard.className = 'match-card';
-            matchCard.innerHTML = `
-              <h3>${data.username}</h3>
-              <p>${data.email}</p>
-              <button onclick="sendMessage('${doc.id}')">Message</button>
-            `;
-            matchesDiv.appendChild(matchCard);
-          }
-        });
-      });
-    });
-
-    // Function to send message (dummy redirect for now)
-    function sendMessage(userId) {
-      alert("Messaging " + userId);
-      window.location.href = "chat.html";
-    }
-  </script>
+  <!-- App logic -->
+  <script defer src="matches.js"></script>
 </body>
 </html>
